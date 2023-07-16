@@ -3,8 +3,8 @@
 use std::ops::{Add, Div, Sub, Mul, Neg};
 use std::fmt::Display;
 use num::{NumCast, Num};
-pub trait Number: Num + Neg<Output=Self> + NumCast + Copy + Num + Display {}
-impl<T: Num + NumCast + Copy + Neg<Output=T> + Display> Number for T {}
+pub trait Number: Num + Neg<Output=Self> + NumCast + Copy + Num + Display + PartialOrd + Default + Sized {}
+impl<T: Num + NumCast + Copy + Neg<Output=T> + Display + PartialOrd + Default + Sized> Number for T {}
 
 #[derive(Debug, Clone)]
 pub struct Vec3<T> {
@@ -18,11 +18,11 @@ where T: Number {
     pub fn new(x: T, y: T, z: T) -> Self {
         Self{x, y, z}
     }
-    pub fn dot(&self, rhs: Self) -> T {
+    pub fn dot(&self, rhs: &Self) -> T {
         self.x * rhs.x + self.y * rhs.y + self.z * rhs.z
     }
     
-    pub fn cross(&self, rhs: Self) -> Self {
+    pub fn cross(&self, rhs: &Self) -> Self {
         Self::new(
             self.y * rhs.z - self.z * rhs.y,
             self.z * rhs.x - self.x * rhs.z,
@@ -30,8 +30,12 @@ where T: Number {
         )
     }
 
+    pub fn length_squared(&self) -> f64 {
+        (self.x * self.x + self.y * self.y + self.z * self.z).to_f64().unwrap_or(-1.0)
+    }
+
     pub fn length(&self) -> f64 {
-        return (self.x * self.x + self.y * self.y + self.z * self.z).to_f64().unwrap_or(-1.0).sqrt();
+        self.length_squared().sqrt()
     }
 
     pub fn scale(&self, factor: T) -> Self {
