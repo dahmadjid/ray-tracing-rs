@@ -34,7 +34,7 @@ fn main() {
         image: Image { width: 1024, height: (1024. / aspect_ratio) as u32, data: vec![] }
     };
 
-    scene.objects.push(Object::Sphere(Sphere{radius: 0.5, center: Vec3::new(0., 0., -1.)}));
+    scene.objects.push(Object::Sphere(Sphere{radius: 0.5, center: Vec3::new(0.5, 0., -1.)}));
     scene.objects.push(Object::Sphere(Sphere{radius: 0.2, center: Vec3::new(1., 0., -1.)}));
     scene.objects.push(Object::Sphere(Sphere{radius: 0.2, center: Vec3::new(0., 1., -1.)}));
     scene.objects.push(Object::Sphere(Sphere{radius: 100., center: Vec3::new(0., -100.5, -1.)}));

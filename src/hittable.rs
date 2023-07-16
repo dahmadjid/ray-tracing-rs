@@ -41,9 +41,9 @@ where T: Number {
             let ray_at = ray.at(root);
             let normal = (ray_at.clone() - self.center.clone()).scale(T::one() / self.radius);
             if ray.direction.dot(&normal) > T::zero() {
-                Some(HitReturn{position: ray_at, normal: normal, front_face: true, t: root})
+                Some(HitReturn{position: ray_at, normal: -normal, front_face: true, t: root})
             } else {
-                Some(HitReturn{position: ray_at, normal: -normal, front_face: false, t: root})
+                Some(HitReturn{position: ray_at, normal: normal, front_face: false, t: root})
             }
         }
     }
