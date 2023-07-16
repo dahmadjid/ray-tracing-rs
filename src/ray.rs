@@ -11,6 +11,6 @@ pub struct Ray<T> {
 impl<T> Ray<T>
 where T: Number {
     pub fn at(&self, t:T) -> Vec3<T> {
-        self.origin.clone() * self.direction.scale(t)
+        self.origin.clone() + self.direction.scale(t)
     }
 }
