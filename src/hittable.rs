@@ -31,9 +31,9 @@ where T: Number {
             None
         } else {
             let discriminant_sqrted = T::from(discriminant.to_f64().unwrap_or(-1.).sqrt()).unwrap_or_default();
-            let mut root = (-half_b - discriminant_sqrted ) / a;
+            let mut root = (T::zero()-half_b - discriminant_sqrted ) / a;
             if root > t_max || root < t_min {
-                root = (-half_b + discriminant_sqrted ) / a;
+                root = (T::zero()-half_b + discriminant_sqrted ) / a;
                 if root > t_max || root < t_min {
                     return None;
                 } 

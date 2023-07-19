@@ -3,8 +3,10 @@
 use std::ops::{Add, Div, Sub, Mul, Neg};
 use std::fmt::Display;
 use num::{NumCast, Num};
-pub trait Number: Num + Neg<Output=Self> + NumCast + Copy + Num + Display + PartialOrd + Default + Sized {}
-impl<T: Num + NumCast + Copy + Neg<Output=T> + Display + PartialOrd + Default + Sized> Number for T {}
+
+
+pub trait Number: Num + NumCast + Copy + Num + Display + PartialOrd + Default + Sized {}
+impl<T: Num + NumCast + Copy + Display + PartialOrd + Default + Sized> Number for T {}
 
 #[derive(Debug, Clone)]
 pub struct Vec3<T> {
@@ -68,7 +70,6 @@ where T: Number {
     }
 }
 
-
 impl<T> Add for Vec3<T> 
 where T: Number {
     type Output = Vec3<T>;
@@ -105,7 +106,7 @@ impl<T> Neg for Vec3<T>
 where T: Number {
     type Output = Self;
     fn neg(self) -> Self {
-        Self::new(-self.x, -self.y, -self.z)
+        Self::new(T::zero()-self.x, T::zero()-self.y, T::zero()-self.z)
     }
 }
 

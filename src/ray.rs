@@ -28,14 +28,17 @@ where T: Number {
         ret
     }
 
-    pub fn color(&self, objects: &Vec<Object<T>>, t_min: T, t_max: T) -> Vec3<T> {
+    pub fn color(&self, objects: &Vec<Object<T>>, t_min: T, t_max: T) -> Vec3<u8> {
         if let Some(hit_return) = self.hit(objects, t_min, t_max) {
-            (hit_return.normal + Vec3::new(T::one(), T::one(), T::one())).scale(T::from(0.5).unwrap())
+            let temp =(hit_return.normal + Vec3::new(T::one(), T::one(), T::one())).scale(T::from(0.5).unwrap()).scale(T::from(255.999).unwrap()).floor();
+            Vec3::new(temp.x as u8, temp.y as u8, temp.z as u8)
         } else {
             let unit_direction = self.direction.normalize();
-            let t = T::from(0.5*(unit_direction.y + 1.0)).unwrap();
-            Vec3::new(T::one(), T::one(), T::one()).scale(T::one() - t) + Vec3::new(T::from(0.5).unwrap(), T::from(0.7).unwrap(), T::one()).scale(t)
+            let t = T::from(0.5*(unit_direction.y + 1.0)).unwrap_or_default();
+            let temp = (Vec3::new(T::one(), T::one(), T::one()).scale(T::one() - t) + Vec3::new(T::from(0.5).unwrap_or_default(), T::from(0.7).unwrap_or_default(), T::one()).scale(t)).scale(T::from(255.999).unwrap_or_default()).floor();
+            Vec3::new(temp.x as u8, temp.y as u8, temp.z as u8)
         }
+        
     }
 
 
