@@ -28,15 +28,30 @@ where T: Number {
         ret
     }
 
-    pub fn color(&self, objects: &Vec<Object<T>>, t_min: T, t_max: T) -> Vec3<u8> {
+    pub fn color(&self, objects: &Vec<Object<T>>, t_min: T, t_max: T, depth: u32) -> Vec3<T> {
+        if depth <= 0 {
+            return Vec3::new(T::zero(), T::zero(), T::zero());
+        }
+        
         if let Some(hit_return) = self.hit(objects, t_min, t_max) {
-            let temp =(hit_return.normal + Vec3::new(T::one(), T::one(), T::one())).scale(T::from(0.5).unwrap()).scale(T::from(255.999).unwrap()).floor();
-            Vec3::new(temp.x as u8, temp.y as u8, temp.z as u8)
+            let mut v = Vec3::<f64>::random();
+            loop {
+                if v.length_squared() < 1.0 {
+                    break;
+                } 
+                v = Vec3::<f64>::random();
+            };
+            v = v.normalize();
+            let target = hit_return.position.clone() + hit_return.normal + Vec3::new(T::from(v.x).unwrap_or_default(), T::from(v.y).unwrap_or_default(), T::from(v.z).unwrap_or_default());
+            let new_ray = Ray{origin: hit_return.position, direction:target}; 
+            let new_color = new_ray.color(objects, t_min, t_max, depth - 1);
+            let scaling = T::from(0.5).unwrap_or_default();
+            new_color.scale(scaling)            
         } else {
             let unit_direction = self.direction.normalize();
             let t = T::from(0.5*(unit_direction.y + 1.0)).unwrap_or_default();
-            let temp = (Vec3::new(T::one(), T::one(), T::one()).scale(T::one() - t) + Vec3::new(T::from(0.5).unwrap_or_default(), T::from(0.7).unwrap_or_default(), T::one()).scale(t)).scale(T::from(255.999).unwrap_or_default()).floor();
-            Vec3::new(temp.x as u8, temp.y as u8, temp.z as u8)
+            let temp = Vec3::new(T::one(), T::one(), T::one()).scale(T::one() - t) + Vec3::new(T::from(0.5).unwrap_or_default(), T::from(0.7).unwrap_or_default(), T::one()).scale(t);
+            Vec3::new(temp.x, temp.y, temp.z)
         }
         
     }

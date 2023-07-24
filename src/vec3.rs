@@ -3,6 +3,7 @@
 use std::ops::{Add, Div, Sub, Mul, Neg};
 use std::fmt::Display;
 use num::{NumCast, Num};
+use rand::Rng;
 
 
 pub trait Number: Num + NumCast + Copy + Num + Display + PartialOrd + Default + Sized {}
@@ -67,6 +68,11 @@ where T: Number {
             self.y.to_f64().unwrap_or(0.).ceil() as i64, 
             self.z.to_f64().unwrap_or(0.).ceil() as i64,
         ) 
+    }
+
+    pub fn random() -> Vec3<f64> {
+        let mut rng = rand::thread_rng();
+        Vec3::new(rng.gen(), rng.gen(), rng.gen())
     }
 }
 

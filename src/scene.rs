@@ -55,40 +55,37 @@ pub struct Scene<T> {
 }
 
 impl Scene<f64> {
-    pub fn render(&mut self) {
+    pub fn render(&mut self) -> Vec<Vec3<u8>> {
         let now = Instant::now();
 
         for j in (0..self.image.height).rev() {
             for i in 0..self.image.width {
                 let mut out_color = Vec3::<u32>::new(0, 0, 0); 
-                let sample_per_pixel = 2;
+                let sample_per_pixel = 1;
                 let mut rng = rand::thread_rng();
                 for _i in 0..sample_per_pixel {
-                    let rand_u: f64 = rng.gen(); 
-                    let rand_v: f64 = rng.gen(); 
-                    let u = (i as f64 + rand_u) / (self.image.width -1) as f64;
-                    let v = (j as f64 + rand_v) / (self.image.height -1) as f64;
+                    // let rand_u: f64 = rng.gen(); 
+                    // let rand_v: f64 = rng.gen(); 
+                    let u = (i as f64) / (self.image.width -1) as f64;
+                    let v = (j as f64) / (self.image.height -1) as f64;
                     // println!("{rand_u} {rand_v}");
                     let ray = self.camera.emit_ray(u, v);
-                    let color = ray.color(&self.objects, 0.0, f64::INFINITY);
+                    let color = ray.color(&self.objects, 0.01, f64::INFINITY, 2);
+                    let color = color.scale(255.999).floor();
                     out_color = out_color + Vec3::new(color.x as u32, color.y as u32, color.z as u32);
                 }
 
-                let temp = Vec3::new(out_color.x as f64 / sample_per_pixel as f64, out_color.y as f64 / sample_per_pixel as f64, out_color.z as f64 / sample_per_pixel as f64);
-                
                 self.image.data.push(
                     Vec3::new(
-                        temp.x as u8, 
-                        temp.y as u8, 
-                        temp.z as u8, 
+                        out_color.x as u8, 
+                        out_color.y as u8, 
+                        out_color.z as u8, 
                     )
                 );
             }
         }
         let new_now = Instant::now();
         println!("{:?}", new_now.duration_since(now));
-
-        self.image.render();
-        self.image.show();     
+        return self.image.data.clone();
     }
 }
