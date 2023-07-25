@@ -1,21 +1,20 @@
 #![allow(dead_code)]
 
-use crate::{vec3::{Vec3, Number}, scene::Object, hittable::{HitReturn, Hittable}};
+use crate::{vec3::{Vec3}, scene::Object, hittable::{HitReturn, Hittable}};
 
 #[derive(Debug, Clone)]
-pub struct Ray<T> {
-    pub origin: Vec3<T>,
-    pub direction: Vec3<T>,
+pub struct Ray {
+    pub origin: Vec3<f64>,
+    pub direction: Vec3<f64>,
 }
 
-impl<T> Ray<T>
-where T: Number {
-    pub fn at(&self, t:T) -> Vec3<T> {
+impl Ray {
+    pub fn at(&self, t:f64) -> Vec3<f64> {
         self.origin.clone() + self.direction.scale(t)
     }
 
-    pub fn hit(&self, objects: &Vec<Object<T>>, t_min: T, t_max: T) -> Option<HitReturn<T>> {
-        let mut ret : Option<HitReturn<T>> = None;
+    pub fn hit(&self, objects: &Vec<Object>, t_min: f64, t_max: f64) -> Option<HitReturn> {
+        let mut ret : Option<HitReturn> = None;
         let mut closest = t_max;
         for obj in objects {
             if let Some(hit_return)= match obj {
@@ -28,32 +27,39 @@ where T: Number {
         ret
     }
 
-    pub fn color(&self, objects: &Vec<Object<T>>, t_min: T, t_max: T, depth: u32) -> Vec3<T> {
-        if depth <= 0 {
-            return Vec3::new(T::zero(), T::zero(), T::zero());
+    pub fn color(&self, objects: &Vec<Object>, t_min: f64, t_max: f64, max_depth: u32) -> Vec3<u8> {
+        if max_depth == 0 {
+            return Vec3::new(0, 0, 0);
         }
-        
-        if let Some(hit_return) = self.hit(objects, t_min, t_max) {
-            let mut v = Vec3::<f64>::random();
-            loop {
-                if v.length_squared() < 1.0 {
-                    break;
-                } 
-                v = Vec3::<f64>::random();
-            };
-            v = v.normalize();
-            let target = hit_return.position.clone() + hit_return.normal + Vec3::new(T::from(v.x).unwrap_or_default(), T::from(v.y).unwrap_or_default(), T::from(v.z).unwrap_or_default());
-            let new_ray = Ray{origin: hit_return.position, direction:target}; 
-            let new_color = new_ray.color(objects, t_min, t_max, depth - 1);
-            let scaling = T::from(0.5).unwrap_or_default();
-            new_color.scale(scaling)            
+        let mut total = Vec3::new(0., 0., 0.);
+        let mut ray = self.clone();
+        let mut hit_count = 0;
+        for _ in (0..max_depth).rev() {
+            if let Some(hit_return) = ray.hit(objects, t_min, t_max) {
+                let mut v = Vec3::<f64>::random();
+                loop {
+                    if v.length_squared() < 1.0 {
+                        break;
+                    } 
+                    v = Vec3::<f64>::random();
+                };
+                v = v.normalize();
+                let target = hit_return.position + hit_return.normal + v;
+                ray.origin = hit_return.position;
+                ray.direction= target; 
+                total = total + hit_return.normal;
+                hit_count += 1;
+            } else {
+                break;
+            }
+
+        }
+        if hit_count > 0 {
+            total.scale(1. / hit_count as f64).scale(255.99).into()
+
         } else {
-            let unit_direction = self.direction.normalize();
-            let t = T::from(0.5*(unit_direction.y + 1.0)).unwrap_or_default();
-            let temp = Vec3::new(T::one(), T::one(), T::one()).scale(T::one() - t) + Vec3::new(T::from(0.5).unwrap_or_default(), T::from(0.7).unwrap_or_default(), T::one()).scale(t);
-            Vec3::new(temp.x, temp.y, temp.z)
+            Vec3::new(0, 0, 0)
         }
-        
     }
 
 

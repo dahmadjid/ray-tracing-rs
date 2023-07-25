@@ -1,10 +1,10 @@
 use pixels::{Pixels, SurfaceTexture};
 use winit::dpi::LogicalSize;
-use winit::event::{Event};
+use winit::event::{Event, VirtualKeyCode};
 use winit::event_loop::{ControlFlow, EventLoop};
 use winit::window::WindowBuilder;
 use winit_input_helper::WinitInputHelper;
-use crate::vec3::Vec3;
+use crate::scene::Scene;
 
 pub struct Window {
     pub width: u32,
@@ -13,8 +13,7 @@ pub struct Window {
 }
 
 impl Window {
-    pub fn render_loop<F, G>(&self, mut on_redraw_requested: G, mut on_frame_updated: F)
-    where F :'static + FnMut(&WinitInputHelper,  &mut ControlFlow), G:  'static + FnMut() -> Vec<Vec3<u8>> {
+    pub fn render_loop(&self, scene: Scene) {
         let event_loop = EventLoop::new();
         let mut input = WinitInputHelper::new();
         let window = {
@@ -35,7 +34,7 @@ impl Window {
         event_loop.run(move |event, _, control_flow| {
             // Draw the current frame
             if let Event::RedrawRequested(_) = event {
-                let image = on_redraw_requested();
+                let image = scene.render();
                 for (i, pixel) in pixels.frame_mut().chunks_exact_mut(4).enumerate() {
                     pixel[0] = image[i].x;
                     pixel[1] = image[i].y;
@@ -49,10 +48,27 @@ impl Window {
                 }
             }
     
+            // Resize the window
             if input.update(&event) {
-                window.request_redraw();
-                on_frame_updated(&input, control_flow);
+                if let Some(size) = input.window_resized() {
+                    if let Err(err) = pixels.resize_surface(size.width, size.height) {
+                        println!("pixels.resize_surface error: {}", err);
+                        *control_flow = ControlFlow::Exit;
+                        return;
+                    }
+                }
+                if input.key_pressed(VirtualKeyCode::Escape) || input.close_requested() {
+                    *control_flow = ControlFlow::Exit;
+                    return;
+                }
+        
+                if input.key_pressed(VirtualKeyCode::Up) {
+                }
+        
+                if input.key_pressed(VirtualKeyCode::Down) {
+                }
             }
+            window.request_redraw();
         });
     }
 }

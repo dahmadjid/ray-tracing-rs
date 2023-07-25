@@ -1,27 +1,24 @@
 #![allow(dead_code)]
 
-use std::ops::{Add, Div, Sub, Mul, Neg};
-use std::fmt::Display;
-use num::{NumCast, Num};
+use std::{ops::{Mul, Sub, Add, Div, Neg}, fmt::Display};
+
 use rand::Rng;
 
-
-pub trait Number: Num + NumCast + Copy + Num + Display + PartialOrd + Default + Sized {}
-impl<T: Num + NumCast + Copy + Display + PartialOrd + Default + Sized> Number for T {}
-
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct Vec3<T> {
     pub x: T,
     pub y: T,
     pub z: T,
 }
 
-impl<T> Vec3<T> 
-where T: Number {
+impl<T> Vec3<T> {
     pub fn new(x: T, y: T, z: T) -> Self {
         Self{x, y, z}
     }
-    pub fn dot(&self, rhs: &Self) -> T {
+}
+
+impl Vec3<f64> {
+    pub fn dot(&self, rhs: &Self) -> f64 {
         self.x * rhs.x + self.y * rhs.y + self.z * rhs.z
     }
     
@@ -34,40 +31,40 @@ where T: Number {
     }
 
     pub fn length_squared(&self) -> f64 {
-        (self.x * self.x + self.y * self.y + self.z * self.z).to_f64().unwrap_or(-1.0)
+        self.x * self.x + self.y * self.y + self.z * self.z
     }
 
     pub fn length(&self) -> f64 {
         self.length_squared().sqrt()
     }
 
-    pub fn scale(&self, factor: T) -> Self {
+    pub fn scale(&self, factor: f64) -> Self {
         Self::new(self.x * factor, self.y * factor, self.z * factor)
     }
 
     pub fn normalize(&self) -> Vec3<f64> {
         let length = self.length();
         Vec3::new(
-            self.x.to_f64().unwrap_or(0.) / length, 
-            self.y.to_f64().unwrap_or(0.) / length, 
-            self.z.to_f64().unwrap_or(0.) / length,
+            self.x / length, 
+            self.y / length, 
+            self.z / length,
         )
     }
 
     pub fn floor(&self) -> Vec3<i64> {
-        Vec3::new(
-            self.x.to_f64().unwrap_or(0.).floor() as i64,
-            self.y.to_f64().unwrap_or(0.).floor() as i64, 
-            self.z.to_f64().unwrap_or(0.).floor() as i64,
-        ) 
+        Vec3{
+            x: self.x.floor() as i64,
+            y: self.y.floor() as i64, 
+            z: self.z.floor() as i64,
+        } 
     }
 
     pub fn ceil(&self) -> Vec3<i64> {
-        Vec3::new(
-            self.x.to_f64().unwrap_or(0.).ceil() as i64,
-            self.y.to_f64().unwrap_or(0.).ceil() as i64, 
-            self.z.to_f64().unwrap_or(0.).ceil() as i64,
-        ) 
+        Vec3{
+            x: self.x.ceil() as i64,
+            y: self.y.ceil() as i64, 
+            z: self.z.ceil() as i64,
+        } 
     }
 
     pub fn random() -> Vec3<f64> {
@@ -76,50 +73,61 @@ where T: Number {
     }
 }
 
-impl<T> Add for Vec3<T> 
-where T: Number {
+impl<T: Add<Output = T>> Add for Vec3<T> {
     type Output = Vec3<T>;
     fn add(self, rhs: Self) -> Self::Output {
         Self::new(self.x + rhs.x, self.y + rhs.y, self.z + rhs.z)
     }
 }
 
-impl<T> Sub for Vec3<T>
-where T: Number {
+impl<T: Sub<Output = T>> Sub for Vec3<T>{
     type Output = Self;
     fn sub(self, rhs: Self) -> Self::Output {
-        Self{x: self.x - rhs.x, y: self.y - rhs.y, z: self.z - rhs.z }
+        Self::new(self.x - rhs.x, self.y - rhs.y, self.z - rhs.z)
     }
 }
 
-impl<T> Mul for Vec3<T> 
-where T: Number {
+impl<T: Mul<Output = T>> Mul for Vec3<T> {
     type Output = Self;
     fn mul(self, rhs: Self) -> Self::Output {
-        Self{x: self.x * rhs.x, y: self.y * rhs.y, z: self.z * rhs.z }
+        Self::new(self.x * rhs.x, self.y * rhs.y, self.z * rhs.z)
     }
 }
 
-impl<T> Div for Vec3<T> 
-where T: Number {
-    type Output = Vec3<T>;
-    fn div(self, rhs: Vec3<T>) -> Self::Output {
-        Self::Output{x: self.x / rhs.x, y: self.y / rhs.y, z: self.z / rhs.z }
+impl<T: Div<Output = T>> Div for Vec3<T> {
+    type Output = Self;
+    fn div(self, rhs: Self) -> Self::Output {
+        Self::new(self.x / rhs.x, self.y / rhs.y, self.z / rhs.z)
     }
 }
 
-impl<T> Neg for Vec3<T> 
-where T: Number {
+impl<T: Neg<Output = T>> Neg for Vec3<T> {
     type Output = Self;
     fn neg(self) -> Self {
-        Self::new(T::zero()-self.x, T::zero()-self.y, T::zero()-self.z)
+        Self::new(-self.x, -self.y, -self.z)
     }
 }
 
-impl<T> Display for Vec3<T>
-where T: Number {
+impl<T: Display> Display for Vec3<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{} {} {}", self.x, self.y, self.z)
     }
 }
 
+impl From<Vec3<f64>> for Vec3<u8> {
+    fn from(v: Vec3<f64>) -> Vec3<u8> {
+        Vec3::<u8>{x: v.x as u8, y: v.y as u8, z: v.z as u8}
+    }
+}
+
+impl From<Vec3<i64>> for Vec3<u8> {
+    fn from(v: Vec3<i64>) -> Vec3<u8> {
+        Vec3::<u8>{x: v.x as u8, y: v.y as u8, z: v.z as u8}
+    }
+}
+
+impl From<Vec3<u8>> for Vec3<f64> {
+    fn from(v: Vec3<u8>) -> Vec3<f64> {
+        Vec3::<f64>{x: v.x as f64, y: v.y as f64, z: v.z as f64}
+    }
+}
