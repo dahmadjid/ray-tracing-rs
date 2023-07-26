@@ -13,7 +13,7 @@ pub struct Window {
 }
 
 impl Window {
-    pub fn render_loop(&self, scene: Scene) {
+    pub fn render_loop(&self, mut scene: Scene) {
         let event_loop = EventLoop::new();
         let mut input = WinitInputHelper::new();
         let window = {

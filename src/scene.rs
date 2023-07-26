@@ -1,6 +1,5 @@
 use std::time::Instant;
-
-use crate::{hittable::*, vec3::Vec3, ray::Ray};
+use crate::{hittable::*, vec3::Vec3, ray::Ray, fonts::{render_string, RasterizedCharacter, rasterize_alphabet, CHARACTER_PX}, ASPECT_RATIO, draw_string};
 pub enum Object {
     Sphere(Sphere),
 }
@@ -24,17 +23,17 @@ impl Camera {
             horizontal_axis: Vec3::new(width, 0.0, 0.0),
             vertical_axis: Vec3::new(0.0, height, 0.0),
         }
-
     }
+    
     pub fn emit_ray(&self, u: f64, v: f64) -> Ray {
         let lower_left_corner = self.position.clone()
-        - self.horizontal_axis.scale(0.5)
-        - self.vertical_axis.scale(0.5)
+        - self.horizontal_axis.clone().scale(0.5)
+        - self.vertical_axis.clone().scale(0.5)
         - Vec3::new(0.0, 0.0, self.focal_length);
 
         let direction = lower_left_corner
-        + self.horizontal_axis.scale(u) 
-        + self.vertical_axis.scale(v) 
+        + self.horizontal_axis.clone().scale(u) 
+        + self.vertical_axis.clone().scale(v) 
         - self.position.clone();
 
         Ray{origin: self.position.clone(), direction}
@@ -46,10 +45,24 @@ pub struct Scene {
     pub camera: Camera,
     pub window_width: u32, 
     pub window_height: u32, 
+    alphabet: [Option<RasterizedCharacter>; 128],
+    frame_count: u32,
+    previous_frame_duration: u128,
 }
 
 impl Scene {
-    pub fn render(&self) -> Vec<Vec3<u8>> {
+    pub fn new(window_width: u32, window_height: u32) -> Self {
+        Scene{
+            camera: Camera::new(2.0 * ASPECT_RATIO, 2.0, Vec3::new(0., 0., 0.), 1.),
+            objects: vec![],
+            window_height: window_height,
+            window_width: window_width,
+            alphabet: rasterize_alphabet(),
+            frame_count: 0,
+            previous_frame_duration: 0,
+        }
+    }
+    pub fn render(&mut self) -> Vec<Vec3<u8>> {
         let mut res = Vec::with_capacity((self.window_height * self.window_width).try_into().unwrap());
         let now = Instant::now();
 
@@ -70,7 +83,13 @@ impl Scene {
             }
         }
         let new_now = Instant::now();
-        println!("{:?}", new_now.duration_since(now));
+        let x_pos = 100;
+        let y_pos = 50;
+        draw_string!(&format!("{:?}ms", self.previous_frame_duration as f64 / 1000.), &self.alphabet, &mut res, self.window_width, x_pos, y_pos);
+        self.frame_count += 1;
+        if self.frame_count % 10 == 0 {
+            self.previous_frame_duration = new_now.duration_since(now).as_micros();
+        }
         return res;
     }
 }

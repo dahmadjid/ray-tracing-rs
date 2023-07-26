@@ -38,8 +38,11 @@ impl Vec3<f64> {
         self.length_squared().sqrt()
     }
 
-    pub fn scale(&self, factor: f64) -> Self {
-        Self::new(self.x * factor, self.y * factor, self.z * factor)
+    pub fn scale(&mut self, factor: f64) -> Self {
+        self.x *= factor;
+        self.y *= factor;
+        self.z *= factor;
+        *self
     }
 
     pub fn normalize(&self) -> Vec3<f64> {
@@ -70,6 +73,13 @@ impl Vec3<f64> {
     pub fn random() -> Vec3<f64> {
         let mut rng = rand::thread_rng();
         Vec3::new(rng.gen(), rng.gen(), rng.gen())
+    }
+
+    pub fn shift(&mut self, scalar: f64) -> Vec3<f64> {
+        self.x += scalar;
+        self.y += scalar;
+        self.z += scalar;
+        *self
     }
 }
 

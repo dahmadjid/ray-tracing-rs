@@ -10,7 +10,7 @@ pub struct Ray {
 
 impl Ray {
     pub fn at(&self, t:f64) -> Vec3<f64> {
-        self.origin.clone() + self.direction.scale(t)
+        self.origin.clone() + self.direction.clone().scale(t)
     }
 
     pub fn hit(&self, objects: &Vec<Object>, t_min: f64, t_max: f64) -> Option<HitReturn> {
@@ -35,7 +35,7 @@ impl Ray {
         let mut ray = self.clone();
         let mut hit_count = 0;
         for _ in (0..max_depth).rev() {
-            if let Some(hit_return) = ray.hit(objects, t_min, t_max) {
+            if let Some(mut hit_return) = ray.hit(objects, t_min, t_max) {
                 let mut v = Vec3::<f64>::random();
                 loop {
                     if v.length_squared() < 1.0 {
@@ -47,7 +47,7 @@ impl Ray {
                 let target = hit_return.position + hit_return.normal + v;
                 ray.origin = hit_return.position;
                 ray.direction= target; 
-                total = total + hit_return.normal;
+                total = total + (hit_return.normal.scale(0.5).shift(0.5));
                 hit_count += 1;
             } else {
                 break;
