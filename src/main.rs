@@ -4,6 +4,7 @@ mod hittable;
 mod scene;
 mod window;
 mod fonts;
+mod camera;
 
 use hittable::Sphere;
 use scene::{Scene, Object};
@@ -13,7 +14,6 @@ use window::Window;
 const ASPECT_RATIO: f64 = 16 as f64/9 as f64;
 
 fn main() {
-    
     let window =  Window{width: 1024, height: (1024. / ASPECT_RATIO) as u32, title: "Ray Tracer"};
     let mut scene = Scene::new(window.width, window.height);
 

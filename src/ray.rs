@@ -35,7 +35,7 @@ impl Ray {
         let mut ray = self.clone();
         let mut hit_count = 0;
         for _ in (0..max_depth).rev() {
-            if let Some(mut hit_return) = ray.hit(objects, t_min, t_max) {
+            if let Some(hit_return) = ray.hit(objects, t_min, t_max) {
                 let mut v = Vec3::<f64>::random();
                 loop {
                     if v.length_squared() < 1.0 {
@@ -44,10 +44,15 @@ impl Ray {
                     v = Vec3::<f64>::random();
                 };
                 v = v.normalize();
+                
                 let target = hit_return.position + hit_return.normal + v;
                 ray.origin = hit_return.position;
-                ray.direction= target; 
-                total = total + (hit_return.normal.scale(0.5).shift(0.5));
+                ray.direction= target;
+                
+                let mut sphere_color = Vec3::new(1., 0., 1.);
+                let light_dir = Vec3::new(-1., -1., -1.);
+
+                total = total + sphere_color.scale(hit_return.normal.dot(&-light_dir));
                 hit_count += 1;
             } else {
                 break;

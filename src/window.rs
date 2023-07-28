@@ -61,11 +61,13 @@ impl Window {
                     *control_flow = ControlFlow::Exit;
                     return;
                 }
-        
+                
                 if input.key_pressed(VirtualKeyCode::Up) {
+                    scene.camera.position.y += 0.1; 
                 }
         
                 if input.key_pressed(VirtualKeyCode::Down) {
+                    scene.camera.position.y -= 0.1; 
                 }
             }
             window.request_redraw();

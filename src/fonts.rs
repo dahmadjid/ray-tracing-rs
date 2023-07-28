@@ -1,7 +1,5 @@
 use fontdue::Font;
 
-use crate::vec3::Vec3;
-
 pub const CHARACTER_PX: usize = 14;
 
 #[derive(Debug, Clone)]

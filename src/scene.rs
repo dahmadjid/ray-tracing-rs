@@ -1,43 +1,7 @@
 use std::time::Instant;
-use crate::{hittable::*, vec3::Vec3, ray::Ray, fonts::{render_string, RasterizedCharacter, rasterize_alphabet, CHARACTER_PX}, ASPECT_RATIO, draw_string};
+use crate::{hittable::*, vec3::Vec3, fonts::{render_string, RasterizedCharacter, rasterize_alphabet, CHARACTER_PX}, ASPECT_RATIO, draw_string, camera::Camera};
 pub enum Object {
     Sphere(Sphere),
-}
-
-pub struct Camera {
-    pub height: f64,
-    pub width: f64,
-    pub horizontal_axis: Vec3<f64>,
-    pub vertical_axis: Vec3<f64>,
-    pub position: Vec3<f64>,
-    pub focal_length: f64,
-}
-
-impl Camera {
-    pub fn new(width: f64, height: f64, position: Vec3<f64>, focal_length: f64) -> Camera {
-        Camera{
-            position,
-            focal_length,
-            height: height,
-            width: width,
-            horizontal_axis: Vec3::new(width, 0.0, 0.0),
-            vertical_axis: Vec3::new(0.0, height, 0.0),
-        }
-    }
-    
-    pub fn emit_ray(&self, u: f64, v: f64) -> Ray {
-        let lower_left_corner = self.position.clone()
-        - self.horizontal_axis.clone().scale(0.5)
-        - self.vertical_axis.clone().scale(0.5)
-        - Vec3::new(0.0, 0.0, self.focal_length);
-
-        let direction = lower_left_corner
-        + self.horizontal_axis.clone().scale(u) 
-        + self.vertical_axis.clone().scale(v) 
-        - self.position.clone();
-
-        Ray{origin: self.position.clone(), direction}
-    }
 }
 
 pub struct Scene {
@@ -71,7 +35,7 @@ impl Scene {
                 let u = (i as f64) / (self.window_width -1) as f64;
                 let v = (j as f64) / (self.window_height -1) as f64;
                 let ray = self.camera.emit_ray(u, v);
-                let color = ray.color(&self.objects, 0.01, f64::INFINITY, 10);
+                let color = ray.color(&self.objects, 0.01, f64::INFINITY, 1);
 
                 res.push(
                     Vec3::new(
@@ -82,12 +46,12 @@ impl Scene {
                 );
             }
         }
-        let new_now = Instant::now();
         let x_pos = 100;
         let y_pos = 50;
         draw_string!(&format!("{:?}ms", self.previous_frame_duration as f64 / 1000.), &self.alphabet, &mut res, self.window_width, x_pos, y_pos);
         self.frame_count += 1;
         if self.frame_count % 10 == 0 {
+            let new_now = Instant::now();
             self.previous_frame_duration = new_now.duration_since(now).as_micros();
         }
         return res;
