@@ -1,5 +1,5 @@
 use pixels::{Pixels, SurfaceTexture};
-use winit::dpi::LogicalSize;
+use winit::dpi::{LogicalSize};
 use winit::event::{Event, VirtualKeyCode};
 use winit::event_loop::{ControlFlow, EventLoop};
 use winit::window::WindowBuilder;
@@ -31,6 +31,7 @@ impl Window {
             let surface_texture = SurfaceTexture::new(window_size.width, window_size.height, &window);
             Pixels::new(self.width, self.height, surface_texture).unwrap()
         };
+
         event_loop.run(move |event, _, control_flow| {
             // Draw the current frame
             if let Event::RedrawRequested(_) = event {
@@ -52,7 +53,7 @@ impl Window {
             if input.update(&event) {
                 if let Some(size) = input.window_resized() {
                     if let Err(err) = pixels.resize_surface(size.width, size.height) {
-                        println!("pixels.resize_surface error: {}", err);
+                        println!("ERROR: pixels.resize_surface: {}", err);
                         *control_flow = ControlFlow::Exit;
                         return;
                     }
@@ -62,14 +63,52 @@ impl Window {
                     return;
                 }
                 
-                if input.key_pressed(VirtualKeyCode::Up) {
-                    scene.camera.position.y += 0.1; 
+                if input.mouse_held(1) {
+                    if let Err(err) = window.set_cursor_grab(winit::window::CursorGrabMode::Confined) {
+                        println!("ERROR: set_cursor_grab: {}", err);
+                    }
+                    
+                    if input.key_held(VirtualKeyCode::A) {
+                        scene.camera.update_x_position(0.05); 
+                    }
+            
+                    if input.key_held(VirtualKeyCode::D) {
+                        scene.camera.update_x_position(-0.05); 
+                    }
+
+                    if input.key_held(VirtualKeyCode::Q) {
+                        scene.camera.update_y_position(0.05); 
+                    }
+                    
+                    if input.key_held(VirtualKeyCode::E) {
+                        scene.camera.update_y_position(-0.05); 
+                    }
+                    
+                    if input.key_held(VirtualKeyCode::W) {
+                        scene.camera.update_z_position(0.05); 
+                    }
+                    
+                    if input.key_held(VirtualKeyCode::S) {
+                        scene.camera.update_z_position(-0.05); 
+                    }
+                    let yaw_angle = input.mouse_diff().0 * 0.1;
+                    let pitch_angle = input.mouse_diff().1 * 0.1;
+                    if yaw_angle != 0. {
+                        scene.camera.horizontal_axis.rotate_yaw(yaw_angle as f64);
+                    }
+
+                    if pitch_angle != 0. {
+                        scene.camera.vertical_axis.rotate_pitch(pitch_angle as f64);
+                    }
+
+
+                } else {
+                    if let Err(err) = window.set_cursor_grab(winit::window::CursorGrabMode::None) {
+                        println!("ERROR: set_cursor_grab: {}", err);
+                    }
                 }
-        
-                if input.key_pressed(VirtualKeyCode::Down) {
-                    scene.camera.position.y -= 0.1; 
-                }
-            }
+                
+            } 
             window.request_redraw();
         });
     }

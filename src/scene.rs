@@ -17,23 +17,23 @@ pub struct Scene {
 impl Scene {
     pub fn new(window_width: u32, window_height: u32) -> Self {
         Scene{
-            camera: Camera::new(2.0 * ASPECT_RATIO, 2.0, Vec3::new(0., 0., 0.), 1.),
+            camera: Camera::new(Vec3::new(0., 0., -1.), 90.0),
             objects: vec![],
-            window_height: window_height,
-            window_width: window_width,
+            window_height,
+            window_width,
             alphabet: rasterize_alphabet(),
             frame_count: 0,
             previous_frame_duration: 0,
         }
     }
     pub fn render(&mut self) -> Vec<Vec3<u8>> {
-        let mut res = Vec::with_capacity((self.window_height * self.window_width).try_into().unwrap());
+        let mut res = Vec::with_capacity((self.window_height * self.window_width) as usize);
         let now = Instant::now();
 
         for j in (0..self.window_height).rev() {
             for i in 0..self.window_width {
-                let u = (i as f64) / (self.window_width -1) as f64;
-                let v = (j as f64) / (self.window_height -1) as f64;
+                let u = (i as f64) / (self.window_width) as f64 * 2.0 - 1.;
+                let v = (j as f64) / (self.window_height) as f64 * 2.0 - 1.;
                 let ray = self.camera.emit_ray(u, v);
                 let color = ray.color(&self.objects, 0.01, f64::INFINITY, 1);
 
@@ -54,6 +54,7 @@ impl Scene {
             let new_now = Instant::now();
             self.previous_frame_duration = new_now.duration_since(now).as_micros();
         }
+
         return res;
     }
 }

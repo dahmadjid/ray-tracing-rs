@@ -4,6 +4,8 @@ use std::{ops::{Mul, Sub, Add, Div, Neg}, fmt::Display};
 
 use rand::Rng;
 
+use crate::mat3::Mat3;
+
 #[derive(Debug, Clone, Copy)]
 pub struct Vec3<T> {
     pub x: T,
@@ -31,7 +33,7 @@ impl Vec3<f64> {
     }
 
     pub fn length_squared(&self) -> f64 {
-        self.x * self.x + self.y * self.y + self.z * self.z
+        self.dot(&self)
     }
 
     pub fn length(&self) -> f64 {
@@ -79,6 +81,54 @@ impl Vec3<f64> {
         self.x += scalar;
         self.y += scalar;
         self.z += scalar;
+        *self
+    }
+
+    pub fn rotate_yaw(&mut self, degrees_angle: f64) -> Self{
+        let cos_angle = degrees_angle.to_radians().cos();
+        let sin_angle = degrees_angle.to_radians().sin();
+        let rotation_matrix = Mat3::new([
+            cos_angle, 0., sin_angle,
+            0., 1., 0.,
+            -sin_angle, 0., cos_angle,
+        ]);
+
+        let res = rotation_matrix.vec_mul(self);
+        self.x = res.x;
+        self.y = res.y;
+        self.z = res.z;
+        *self
+    }
+
+    pub fn rotate_pitch(&mut self, degrees_angle: f64) -> Self{
+        let cos_angle = degrees_angle.to_radians().cos();
+        let sin_angle = degrees_angle.to_radians().sin();
+        let rotation_matrix = Mat3::new([
+            1., 0., 0.,
+            0., cos_angle, -sin_angle,
+            0., sin_angle, cos_angle,
+        ]);
+
+        let res = rotation_matrix.vec_mul(self);
+        self.x = res.x;
+        self.y = res.y;
+        self.z = res.z;
+        *self
+    }
+
+    pub fn rotate_roll(&mut self, degrees_angle: f64) -> Self{
+        let cos_angle = degrees_angle.to_radians().cos();
+        let sin_angle = degrees_angle.to_radians().sin();
+        let rotation_matrix = Mat3::new([
+            cos_angle, -sin_angle, 0.,
+            sin_angle, cos_angle, 0.,
+            0., 0., 1., 
+        ]);
+
+        let res = rotation_matrix.vec_mul(self);
+        self.x = res.x;
+        self.y = res.y;
+        self.z = res.z;
         *self
     }
 }

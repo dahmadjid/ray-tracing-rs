@@ -10,7 +10,7 @@ pub struct Ray {
 
 impl Ray {
     pub fn at(&self, t:f64) -> Vec3<f64> {
-        self.origin.clone() + self.direction.clone().scale(t)
+        self.origin + self.direction.clone().scale(t)
     }
 
     pub fn hit(&self, objects: &Vec<Object>, t_min: f64, t_max: f64) -> Option<HitReturn> {
@@ -36,24 +36,26 @@ impl Ray {
         let mut hit_count = 0;
         for _ in (0..max_depth).rev() {
             if let Some(hit_return) = ray.hit(objects, t_min, t_max) {
-                let mut v = Vec3::<f64>::random();
-                loop {
-                    if v.length_squared() < 1.0 {
-                        break;
-                    } 
-                    v = Vec3::<f64>::random();
-                };
-                v = v.normalize();
+                // let mut v = Vec3::<f64>::random();
+                // loop {
+                //     if v.length_squared() < 1.0 {
+                //         break;
+                //     } 
+                //     v = Vec3::<f64>::random();
+                // };
+                // v = v.normalize();
                 
-                let target = hit_return.position + hit_return.normal + v;
-                ray.origin = hit_return.position;
-                ray.direction= target;
+                // let target = hit_return.position + hit_return.normal;
+                // ray.origin = hit_return.position;
+                // ray.direction= target;
                 
                 let mut sphere_color = Vec3::new(1., 0., 1.);
-                let light_dir = Vec3::new(-1., -1., -1.);
-
-                total = total + sphere_color.scale(hit_return.normal.dot(&-light_dir));
-                hit_count += 1;
+                let normal = hit_return.hit_position.normalize();
+                let light_dir = Vec3::new(1., 1., 0.).normalize();
+                let light_intensity = normal.dot(&light_dir).max(0.0);
+                return sphere_color.scale(light_intensity).scale(255.99).into();
+                // hit_count += 1;
+                break;
             } else {
                 break;
             }

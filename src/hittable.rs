@@ -2,7 +2,7 @@ use crate::vec3::Vec3;
 use crate::ray::Ray;
 #[derive(Clone, Copy)]
 pub struct HitReturn {
-    pub position: Vec3<f64>,
+    pub hit_position: Vec3<f64>,
     pub normal: Vec3<f64>,
     pub t: f64,
     pub front_face: bool,
@@ -20,28 +20,28 @@ pub struct Sphere {
 
 impl Hittable for Sphere {
     fn hit(&self, ray: &Ray, t_min: f64, t_max: f64) -> Option<HitReturn> {
-        let oc = ray.origin.clone() - self.center.clone();
-        let a = ray.direction.length_squared();
-        let half_b = oc.dot(&ray.direction);
-        let c = oc.length_squared() - self.radius*self.radius;
-        let discriminant = half_b * half_b - a*c;
+        let oc = ray.origin - self.center;
+        let a = ray.direction.dot(&ray.direction);
+        let b = 2.0 * ray.origin.dot(&ray.direction);
+        let c = ray.origin.dot(&ray.origin) - self.radius*self.radius;
+        let discriminant =  b * b - 4. * a * c;
         if discriminant < 0.0 {
-            None
+                None
         } else {
             let discriminant_sqrted = discriminant.sqrt();
-            let mut root = (-half_b - discriminant_sqrted) / a;
+            let mut root = (-b - discriminant_sqrted) / 2.0 * a;
             if root > t_max || root < t_min {
-                root = (-half_b + discriminant_sqrted ) / a;
+                root = (-b + discriminant_sqrted ) / 2.0 * a;
                 if root > t_max || root < t_min {
                     return None;
                 } 
             }
             let ray_at = ray.at(root);
-            let normal = (ray_at.clone() - self.center.clone()).scale(1.0 / self.radius);
+            let normal = (ray_at - self.center).scale(1.0 / self.radius);
             if ray.direction.dot(&normal) > 0.0 {
-                Some(HitReturn{position: ray_at, normal: -normal, front_face: true, t: root})
+                Some(HitReturn{hit_position: ray_at, normal: -normal, front_face: true, t: root})
             } else {
-                Some(HitReturn{position: ray_at, normal: normal, front_face: false, t: root})
+                Some(HitReturn{hit_position: ray_at, normal: normal, front_face: false, t: root})
             }
         }
     }
