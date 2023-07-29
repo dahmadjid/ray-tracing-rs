@@ -6,7 +6,7 @@ pub struct HitReturn {
     pub normal: Vec3<f64>,
     pub t: f64,
     pub front_face: bool,
-
+    pub object_color: Vec3<f64>,
 }
 pub trait Hittable {
     fn hit(&self, ray: &Ray, t_min: f64, t_max: f64) -> Option<HitReturn>;
@@ -15,15 +15,16 @@ pub trait Hittable {
 pub struct Sphere {
     pub radius: f64,
     pub center: Vec3<f64>,
+    pub color: Vec3<f64>,
 }
 
 
 impl Hittable for Sphere {
     fn hit(&self, ray: &Ray, t_min: f64, t_max: f64) -> Option<HitReturn> {
-        let oc = ray.origin - self.center;
+        let origin = ray.origin - self.center;
         let a = ray.direction.dot(&ray.direction);
-        let b = 2.0 * ray.origin.dot(&ray.direction);
-        let c = ray.origin.dot(&ray.origin) - self.radius*self.radius;
+        let b = 2.0 * origin.dot(&ray.direction);
+        let c = origin.dot(&origin) - self.radius*self.radius;
         let discriminant =  b * b - 4. * a * c;
         if discriminant < 0.0 {
                 None
@@ -36,12 +37,12 @@ impl Hittable for Sphere {
                     return None;
                 } 
             }
-            let ray_at = ray.at(root);
-            let normal = (ray_at - self.center).scale(1.0 / self.radius);
+            let hit_point = origin + ray.direction.clone().scale(root);
+            let normal = hit_point.normalize();
             if ray.direction.dot(&normal) > 0.0 {
-                Some(HitReturn{hit_position: ray_at, normal: -normal, front_face: true, t: root})
+                Some(HitReturn{hit_position: hit_point, normal: -normal, front_face: true, t: root, object_color: self.color})
             } else {
-                Some(HitReturn{hit_position: ray_at, normal: normal, front_face: false, t: root})
+                Some(HitReturn{hit_position: hit_point, normal: normal, front_face: false, t: root, object_color: self.color})
             }
         }
     }

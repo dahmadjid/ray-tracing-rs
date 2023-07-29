@@ -16,15 +16,18 @@ pub struct Scene {
 
 impl Scene {
     pub fn new(window_width: u32, window_height: u32) -> Self {
-        Scene{
-            camera: Camera::new(Vec3::new(0., 0., -1.), 90.0),
+        let s = Scene{
+            camera: Camera::new(Vec3::new(0., 0., 2.), 90.0),
             objects: vec![],
             window_height,
             window_width,
             alphabet: rasterize_alphabet(),
             frame_count: 0,
             previous_frame_duration: 0,
-        }
+        };
+
+        println!("{:?}", s.camera);
+        s
     }
     pub fn render(&mut self) -> Vec<Vec3<u8>> {
         let mut res = Vec::with_capacity((self.window_height * self.window_width) as usize);

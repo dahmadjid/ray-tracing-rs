@@ -6,6 +6,8 @@ mod window;
 mod fonts;
 mod camera;
 mod mat3;
+mod vec4;
+mod mat4;
 
 use hittable::Sphere;
 use scene::{Scene, Object};
@@ -17,11 +19,11 @@ fn main() {
     let window =  Window{width: 800, height: (800. / ASPECT_RATIO) as u32, title: "Ray Tracer"};
     let mut scene = Scene::new(window.width, window.height);
 
-    scene.objects.push(Object::Sphere(Sphere{radius: 0.5, center: Vec3::new(0., 0., 0.)}));
+    scene.objects.push(Object::Sphere(Sphere{radius: 0.5, center: Vec3::new(0., 0., 0.), color: Vec3::new(1., 0., 0.,)}));
     // scene.camera.horizontal_axis.rotate_yaw(180.0);
     // scene.objects.push(Object::Sphere(Sphere{radius: 0.2, center: Vec3::new(1., 0., -1.)}));
     // scene.objects.push(Object::Sphere(Sphere{radius: 0.2, center: Vec3::new(0., 1., -1.)}));
-    // scene.objects.push(Object::Sphere(Sphere{radius: 100., center: Vec3::new(0., -100.5, -1.)}));
+    scene.objects.push(Object::Sphere(Sphere{radius: 1., center: Vec3::new(0., -1., 0.), color: Vec3::new(1., 0., 1.,)}));
     window.render_loop(scene);
     // scene.camera.vertical_axis.rotate_pitch(90.0);
     // scene.camera.position.y -= 1.0;

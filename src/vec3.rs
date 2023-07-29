@@ -28,7 +28,7 @@ impl Vec3<f64> {
         Self::new(
             self.y * rhs.z - self.z * rhs.y,
             self.z * rhs.x - self.x * rhs.z,
-            self.x * rhs.y - self.y - rhs.x,
+            self.x * rhs.y - self.y * rhs.x,
         )
     }
 
@@ -170,7 +170,7 @@ impl<T: Neg<Output = T>> Neg for Vec3<T> {
 
 impl<T: Display> Display for Vec3<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{} {} {}", self.x, self.y, self.z)
+        write!(f, "{{{}, {}, {}}}", self.x, self.y, self.z)
     }
 }
 
@@ -190,4 +190,47 @@ impl From<Vec3<u8>> for Vec3<f64> {
     fn from(v: Vec3<u8>) -> Vec3<f64> {
         Vec3::<f64>{x: v.x as f64, y: v.y as f64, z: v.z as f64}
     }
+}
+
+impl<T: PartialEq> PartialEq for Vec3<T> {
+    fn eq(&self, other: &Self) -> bool {
+        self.x == other.x && self.y == other.y && self.z == other.z
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn dot() {
+        let a = Vec3::new(1.5, 2.5, 10.);
+        let b = Vec3::new(20.5, 3., 3.);
+
+        let c = a.dot(&b);
+
+        assert_eq!(c, 68.25)
+    }
+    #[test]
+    fn cross() {
+        let a = Vec3::new(1.5, 2.5, 10.);
+        let b = Vec3::new(20.5, 3., 3.);
+
+        let c = a.cross(&b);
+
+        assert_eq!(c, Vec3::new(-22.5, 200.5, -46.75))
+    }
+
+    #[test]
+    fn length() {
+        let a = Vec3::new(5.0, 3.0, 1.0);
+        let l = a.length();
+
+        assert_eq!(l, 35.0f64.sqrt())
+    }
+
+//     #[test]
+//     fn yaw() {
+//         let a = Vec3::new()
+//     }
 }

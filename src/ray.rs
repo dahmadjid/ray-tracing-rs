@@ -9,10 +9,6 @@ pub struct Ray {
 }
 
 impl Ray {
-    pub fn at(&self, t:f64) -> Vec3<f64> {
-        self.origin + self.direction.clone().scale(t)
-    }
-
     pub fn hit(&self, objects: &Vec<Object>, t_min: f64, t_max: f64) -> Option<HitReturn> {
         let mut ret : Option<HitReturn> = None;
         let mut closest = t_max;
@@ -20,8 +16,10 @@ impl Ray {
             if let Some(hit_return)= match obj {
                 Object::Sphere(sphere) => sphere.hit(self, t_min, closest), 
             } {
-                closest = hit_return.t;
-                ret = Some(hit_return);
+                if hit_return.t <= closest {
+                    closest = hit_return.t;
+                    ret = Some(hit_return);
+                }
             }
         }
         ret
@@ -48,16 +46,11 @@ impl Ray {
                 // let target = hit_return.position + hit_return.normal;
                 // ray.origin = hit_return.position;
                 // ray.direction= target;
-                
-                let mut sphere_color = Vec3::new(1., 0., 1.);
-                let normal = hit_return.hit_position.normalize();
-                let light_dir = Vec3::new(1., 1., 0.).normalize();
-                let light_intensity = normal.dot(&light_dir).max(0.0);
-                return sphere_color.scale(light_intensity).scale(255.99).into();
+                let light_dir = Vec3::new(-1., -1., -1.).normalize();   
+                return hit_return.object_color.clone().scale(hit_return.normal.dot(&-light_dir).max(0.0)).scale(255.99).into();
                 // hit_count += 1;
-                break;
             } else {
-                break;
+                return Vec3::new(0, 0, 0);
             }
 
         }
