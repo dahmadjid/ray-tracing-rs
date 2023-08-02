@@ -40,9 +40,9 @@ impl Hittable for Sphere {
             let hit_point = origin + ray.direction.clone().scale(root);
             let normal = (hit_point - self.center).normalize();
             if ray.direction.dot(&normal) > 0.0 {
-                Some(HitReturn{hit_position: hit_point, normal: -normal, front_face: true, t: root, object_color: self.color})
+                Some(HitReturn{hit_position: hit_point, normal: -normal, front_face: false, t: root, object_color: self.color})
             } else {
-                Some(HitReturn{hit_position: hit_point, normal: normal, front_face: false, t: root, object_color: self.color})
+                Some(HitReturn{hit_position: hit_point, normal: normal, front_face: true, t: root, object_color: self.color})
             }
         }
     }

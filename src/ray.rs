@@ -32,28 +32,25 @@ impl Ray {
         let mut total = Vec3::new(0., 0., 0.);
         let mut ray = self.clone();
         let mut hit_count = 0;
+        let light_dir = Vec3::new(-1., -1., -1.,).normalize();
         for _ in (0..max_depth).rev() {
             if let Some(hit_return) = ray.hit(objects, t_min, t_max) {
-                // let mut v = Vec3::<f64>::random();
-                // loop {
-                //     if v.length_squared() < 1.0 {
-                //         break;
-                //     } 
-                //     v = Vec3::<f64>::random();
-                // };
-                // v = v.normalize();
+                let mut v = Vec3::<f64>::random();
+                loop {
+                    if v.length_squared() < 1.0 {
+                        break;
+                    } 
+                    v = Vec3::<f64>::random();
+                };
                 
-                // let target = hit_return.hit_position + hit_return.normal;
-                // ray.origin = hit_return.hit_position;
-                // ray.direction= target;
-                let light_dir = Vec3::new(-1., -1., -1.,).normalize();
-                // hit_count += 1;
-                // total = total + hit_return.object_color.clone().scale(light_dir.dot(&hit_return.normal).max(0.0));
-                // break;
-                return hit_return.object_color.clone().scale((hit_return.normal.dot(&-light_dir)).min(1.0).max(0.0)).scale(255.99).into();
-                // return hit_return.hit_position.clone().scale(255.99).into();
+                ray.origin = hit_return.hit_position;
+                ray.direction = (hit_return.normal + v).normalize();
+                total = total + hit_return.object_color.clone().scale(hit_return.normal.dot(&-light_dir).max(0.0) * 0.5f64.powi(hit_count));
+                hit_count += 1;
+                
             } else {
-                return Vec3::new(135, 206, 235);
+                // total = Vec3::new(135./255., 206./255., 235./255.).scale(0.5f64.powi(hit_count));
+                break;
             }
 
         }

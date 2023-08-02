@@ -35,7 +35,7 @@ impl Scene {
 
                 let ray_direction = self.camera.ray_directions[(x + y * self.window_width) as usize];
                 let ray = Ray{origin: self.camera.position.clone(), direction: ray_direction};
-                let color = ray.color(&self.objects, 0.01, f64::INFINITY, 10);
+                let color = ray.color(&self.objects, 0.01, f64::INFINITY, 1);
 
                 res.push(
                     Vec3::new(

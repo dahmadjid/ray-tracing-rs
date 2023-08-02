@@ -46,17 +46,9 @@ impl Camera {
             }
         }
     }
-
-    // pub fn emit_ray(&self, u: f64, v: f64) -> Ray {
-
-    //     let direction = self.lower_left_corner + self.horizontal_axis.clone().scale(u) + self.vertical_axis.clone().scale(v) - self.position;
-        
-    //     Ray{origin: self.position.clone(), direction}
-    // }
     
     pub fn update_x_position(&mut self, x: f64) {
         let up_dir = Vec3::new(0.0, 1.0, 0.0);
-        
         self.position = self.position + self.z_axis.cross(&up_dir).scale(x);
     }
     pub fn update_y_position(&mut self, y: f64) {
@@ -67,32 +59,9 @@ impl Camera {
     }
 
     pub fn rotate(&mut self, pitch_delta_radians: f64, yaw_delta_radians: f64) {
-        // self.x_axis = self.x_axis.rotate_quat_by(degrees_angle, self.y_axis).normalize();
         let up_dir = Vec3::new(0.0, 1.0, 0.0);
         let right_direction = self.z_axis.cross(&up_dir).normalize();
         self.z_axis.rotate(Quat::angle_axis(-pitch_delta_radians, right_direction).cross(&Quat::angle_axis(-yaw_delta_radians, up_dir)).normalize());
     }
 
-}
-
-
-#[cfg(test)]
-mod tests {
-    use assert_float_eq::{assert_f64_near, afe_is_f64_near, afe_near_error_msg};
-
-    use super::*;
-    #[test]
-    fn camera_rays() {
-        let mut cam = Camera::new(45.0, 2, 2);
-        // cam.rotate(0.3, 0.0);
-        // cam.rotate(0.0, 0.3);
-        cam.rotate(0.3, 0.3);
-        
-        cam.calculate_ray_directions();
-        for ray in cam.ray_directions {
-            // println!("{}", ray);
-        }
-
-        assert!(false);
-    }
 }
