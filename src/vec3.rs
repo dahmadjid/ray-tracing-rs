@@ -4,7 +4,7 @@ use std::{ops::{Mul, Sub, Add, Div, Neg}, fmt::Display};
 
 use rand::Rng;
 
-use crate::mat3::Mat3;
+use crate::{mat3::Mat3, quat::Quat};
 
 #[derive(Debug, Clone, Copy)]
 pub struct Vec3<T> {
@@ -48,11 +48,11 @@ impl Vec3<f64> {
     }
 
     pub fn normalize(&self) -> Vec3<f64> {
-        let length = self.length();
+        let one_over_length = 1.0 / self.length();
         Vec3::new(
-            self.x / length, 
-            self.y / length, 
-            self.z / length,
+            self.x * one_over_length, 
+            self.y * one_over_length, 
+            self.z * one_over_length,
         )
     }
 
@@ -84,7 +84,7 @@ impl Vec3<f64> {
         *self
     }
 
-    pub fn rotate_yaw(&mut self, degrees_angle: f64) -> Self{
+    pub fn rotate_yaw_matrix_world(&mut self, degrees_angle: f64) -> Self{
         let cos_angle = degrees_angle.to_radians().cos();
         let sin_angle = degrees_angle.to_radians().sin();
         let rotation_matrix = Mat3::new([
@@ -100,7 +100,7 @@ impl Vec3<f64> {
         *self
     }
 
-    pub fn rotate_pitch(&mut self, degrees_angle: f64) -> Self{
+    pub fn rotate_pitch_matrix_world(&mut self, degrees_angle: f64) -> Self{
         let cos_angle = degrees_angle.to_radians().cos();
         let sin_angle = degrees_angle.to_radians().sin();
         let rotation_matrix = Mat3::new([
@@ -116,7 +116,7 @@ impl Vec3<f64> {
         *self
     }
 
-    pub fn rotate_roll(&mut self, degrees_angle: f64) -> Self{
+    pub fn rotate_roll_matrix_world(&mut self, degrees_angle: f64) -> Self{
         let cos_angle = degrees_angle.to_radians().cos();
         let sin_angle = degrees_angle.to_radians().sin();
         let rotation_matrix = Mat3::new([
@@ -125,12 +125,22 @@ impl Vec3<f64> {
             0., 0., 1., 
         ]);
 
-        let res = rotation_matrix.vec_mul(self);
-        self.x = res.x;
-        self.y = res.y;
-        self.z = res.z;
+        let result = rotation_matrix.vec_mul(self);
+        self.x = result.x;
+        self.y = result.y;
+        self.z = result.z;
         *self
     }
+
+    pub fn rotate(&mut self, rotation_quaternion: Quat<f64>) -> Self {
+        let quat_to_rotate = Quat{w: 0.0, v: *self};
+        let result = rotation_quaternion.cross(&quat_to_rotate).cross(&-rotation_quaternion);
+        self.x = result.v.x;
+        self.y = result.v.y;
+        self.z = result.v.z;
+        *self
+    }
+
 }
 
 impl<T: Add<Output = T>> Add for Vec3<T> {
@@ -200,6 +210,7 @@ impl<T: PartialEq> PartialEq for Vec3<T> {
 
 #[cfg(test)]
 mod tests {
+    use assert_float_eq::*;
     use super::*;
 
     #[test]
@@ -229,8 +240,24 @@ mod tests {
         assert_eq!(l, 35.0f64.sqrt())
     }
 
-//     #[test]
-//     fn yaw() {
-//         let a = Vec3::new()
-//     }
+    #[test]
+    fn rotation_quat() {
+        let a = Vec3::new(1., 0., 0.);
+        let axis = Vec3::new(1., 1., 0.).normalize();
+        let rotated_by_quat = a.clone().rotate(Quat::angle_axis(45.0f64.to_radians(), axis));
+
+        // rotation matrix of 45 degrees from the internet by the (1, 1, 0) axis.
+        let rotation_matrix = Mat3::new([
+            0.8535534,  0.1464466,  0.5000000,
+            0.1464466,  0.8535534, -0.500000,
+            -0.5000000,  0.5000000,  0.7071068 
+        ]);
+
+        
+        let rotated_by_matrix = rotation_matrix.vec_mul(&a);
+        assert_float_absolute_eq!(rotated_by_matrix.x, rotated_by_quat.x, 0.0000001);
+        assert_float_absolute_eq!(rotated_by_matrix.y, rotated_by_quat.y, 0.0000001);
+        assert_float_absolute_eq!(rotated_by_matrix.z, rotated_by_quat.z, 0.0000001);
+
+    }
 }

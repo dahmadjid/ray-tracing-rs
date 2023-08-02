@@ -67,43 +67,46 @@ impl Window {
                     if let Err(err) = window.set_cursor_grab(winit::window::CursorGrabMode::Confined) {
                         println!("ERROR: set_cursor_grab: {}", err);
                     }
-                    
+                    let mut needs_recalculating = false;
                     if input.key_held(VirtualKeyCode::A) {
-                        scene.camera.update_x_position(-0.05); 
+                        scene.camera.update_x_position(-0.1); 
+                        // needs_recalculating = true;
                     }
             
                     if input.key_held(VirtualKeyCode::D) {
-                        scene.camera.update_x_position(0.05); 
+                        scene.camera.update_x_position(0.1); 
+                        // needs_recalculating = true;
                     }
 
                     if input.key_held(VirtualKeyCode::Q) {
-                        scene.camera.update_y_position(0.05); 
+                        scene.camera.update_y_position(0.1); 
+                        // needs_recalculating = true;
                     }
                     
                     if input.key_held(VirtualKeyCode::E) {
-                        scene.camera.update_y_position(-0.05); 
+                        scene.camera.update_y_position(-0.1); 
+                        // needs_recalculating = true;
                     }
                     
                     if input.key_held(VirtualKeyCode::W) {
-                        scene.camera.update_z_position(0.05); 
+                        scene.camera.update_z_position(0.1); 
+                        // needs_recalculating = true;
                     }
                     
                     if input.key_held(VirtualKeyCode::S) {
-                        scene.camera.update_z_position(-0.05); 
+                        scene.camera.update_z_position(-0.1); 
+                        // needs_recalculating = true;
                     }
-                    let yaw_angle = input.mouse_diff().0 * 0.1;
-                    let pitch_angle = input.mouse_diff().1 * 0.1;
-                    if yaw_angle != 0. {
-                        scene.camera.rotate_yaw(-yaw_angle as f64);
-                    }
-
-                    if pitch_angle != 0. {
-                        scene.camera.rotate_pitch(-pitch_angle as f64);
+                    let yaw_angle = input.mouse_diff().0 * 0.001;
+                    let pitch_angle = input.mouse_diff().1 * 0.001;
+                    if yaw_angle != 0. && pitch_angle != 0. {
+                        scene.camera.rotate(pitch_angle as f64, yaw_angle as f64);
+                        needs_recalculating = true;
                     }
 
-                    println!("{:?}\n", scene.camera);
-
-
+                    if needs_recalculating {
+                        scene.camera.calculate_ray_directions();
+                    }
                 } else {
                     if let Err(err) = window.set_cursor_grab(winit::window::CursorGrabMode::None) {
                         println!("ERROR: set_cursor_grab: {}", err);

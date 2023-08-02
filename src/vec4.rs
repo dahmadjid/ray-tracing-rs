@@ -4,8 +4,6 @@ use std::{ops::{Mul, Sub, Add, Div, Neg}, fmt::Display};
 
 use rand::Rng;
 
-use crate::mat3::Mat3;
-
 #[derive(Debug, Clone, Copy)]
 pub struct Vec4<T> {
     pub w: T,
@@ -24,7 +22,7 @@ impl Vec4<f64> {
     pub fn dot(&self, rhs: &Self) -> f64 {
         self.w * rhs.w + self.x * rhs.x + self.y * rhs.y + self.z * rhs.z
     }
-    
+
     pub fn length_squared(&self) -> f64 {
         self.dot(&self)
     }
@@ -42,12 +40,12 @@ impl Vec4<f64> {
     }
 
     pub fn normalize(&self) -> Vec4<f64> {
-        let length = self.length();
+        let one_over_len = 1.0 / self.length();
         Vec4::new(
-            self.w / length,
-            self.x / length, 
-            self.y / length, 
-            self.z / length,
+            self.w * one_over_len,
+            self.x * one_over_len, 
+            self.y * one_over_len, 
+            self.z * one_over_len,
         )
     }
 

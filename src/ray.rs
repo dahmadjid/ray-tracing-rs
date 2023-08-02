@@ -43,14 +43,17 @@ impl Ray {
                 // };
                 // v = v.normalize();
                 
-                // let target = hit_return.position + hit_return.normal;
-                // ray.origin = hit_return.position;
+                // let target = hit_return.hit_position + hit_return.normal;
+                // ray.origin = hit_return.hit_position;
                 // ray.direction= target;
-                let light_dir = Vec3::new(-1., -1., -1.).normalize();   
-                return hit_return.object_color.clone().scale(hit_return.normal.dot(&-light_dir).max(0.0)).scale(255.99).into();
+                let light_dir = Vec3::new(-1., -1., -1.,).normalize();
                 // hit_count += 1;
+                // total = total + hit_return.object_color.clone().scale(light_dir.dot(&hit_return.normal).max(0.0));
+                // break;
+                return hit_return.object_color.clone().scale((hit_return.normal.dot(&-light_dir)).min(1.0).max(0.0)).scale(255.99).into();
+                // return hit_return.hit_position.clone().scale(255.99).into();
             } else {
-                return Vec3::new(0, 0, 0);
+                return Vec3::new(135, 206, 235);
             }
 
         }
@@ -58,7 +61,7 @@ impl Ray {
             total.scale(1. / hit_count as f64).scale(255.99).into()
 
         } else {
-            Vec3::new(0, 0, 0)
+            return Vec3::new(135, 206, 235);
         }
     }
 

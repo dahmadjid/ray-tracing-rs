@@ -1,6 +1,8 @@
 #![allow(dead_code)]
 
 use std::{ops::{Mul, Sub, Add, Div, Neg}, fmt::Display};
+use num::{Zero, One};
+
 use crate::vec3::Vec3;
 
 
@@ -19,7 +21,7 @@ impl<T: Copy> Mat3<T> {
     }
 }
 
-impl<T: Copy + Add<Output=T> + Mul<Output=T>> Mat3<T> {
+impl<T: Copy + Add<Output=T> + Mul<Output=T> + Sub<Output=T> + Div<Output=T> + One + Zero + PartialEq> Mat3<T> {
     pub fn mat_mul(&self, other: &Self) -> Self {
         Self::new(
             [
@@ -30,7 +32,7 @@ impl<T: Copy + Add<Output=T> + Mul<Output=T>> Mat3<T> {
                 self.get(1, 0) * other.get(0, 0) + self.get(1, 1) * other.get(1, 0) + self.get(1, 2) * other.get(2, 0),
                 self.get(1, 0) * other.get(0, 1) + self.get(1, 1) * other.get(1, 1) + self.get(1, 2) * other.get(2, 1),
                 self.get(1, 0) * other.get(0, 2) + self.get(1, 1) * other.get(1, 2) + self.get(1, 2) * other.get(2, 2),
-
+            
                 self.get(2, 0) * other.get(0, 0) + self.get(2, 1) * other.get(1, 0) + self.get(2, 2) * other.get(2, 0),
                 self.get(2, 0) * other.get(0, 1) + self.get(2, 1) * other.get(1, 1) + self.get(2, 2) * other.get(2, 1),
                 self.get(2, 0) * other.get(0, 2) + self.get(2, 1) * other.get(1, 2) + self.get(2, 2) * other.get(2, 2),
@@ -45,6 +47,30 @@ impl<T: Copy + Add<Output=T> + Mul<Output=T>> Mat3<T> {
             self.get(1, 0) * other.x + self.get(1, 1) * other.y + self.get(1, 2) * other.z,
             self.get(2, 0) * other.x + self.get(2, 1) * other.y + self.get(2, 2) * other.z,
         )
+    }
+
+    pub fn inverse(&self) -> Option<Mat3<T>> {
+        let det = self.get(0, 0) * (self.get(1, 1) * self.get(2, 2) - self.get(2, 1) * self.get(1, 2)) -
+        self.get(0, 1) * (self.get(1, 0) * self.get(2, 2) - self.get(1, 2) * self.get(2, 0)) +
+        self.get(0, 2) * (self.get(1, 0) * self.get(2, 1) - self.get(1, 1) * self.get(2, 0));
+
+        if det == T::zero() {
+            None
+        } else {
+            let invdet = T::one() / det;
+    
+            Some(Mat3::new([
+                (self.get(1, 1) * self.get(2, 2) - self.get(2, 1) * self.get(1, 2)) * invdet,
+                (self.get(0, 2) * self.get(2, 1) - self.get(0, 1) * self.get(2, 2)) * invdet,
+                (self.get(0, 1) * self.get(1, 2) - self.get(0, 2) * self.get(1, 1)) * invdet,
+                (self.get(1, 2) * self.get(2, 0) - self.get(1, 0) * self.get(2, 2)) * invdet,
+                (self.get(0, 0) * self.get(2, 2) - self.get(0, 2) * self.get(2, 0)) * invdet,
+                (self.get(1, 0) * self.get(0, 2) - self.get(0, 0) * self.get(1, 2)) * invdet,
+                (self.get(1, 0) * self.get(2, 1) - self.get(2, 0) * self.get(1, 1)) * invdet,
+                (self.get(2, 0) * self.get(0, 1) - self.get(0, 0) * self.get(2, 1)) * invdet,
+                (self.get(0, 0) * self.get(1, 1) - self.get(1, 0) * self.get(0, 1)) * invdet,
+            ]))
+        }
     }
 }
 

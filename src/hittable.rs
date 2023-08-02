@@ -30,15 +30,15 @@ impl Hittable for Sphere {
                 None
         } else {
             let discriminant_sqrted = discriminant.sqrt();
-            let mut root = (-b - discriminant_sqrted) / 2.0 * a;
+            let mut root = (-b - discriminant_sqrted) / (2.0 * a);
             if root > t_max || root < t_min {
-                root = (-b + discriminant_sqrted ) / 2.0 * a;
+                root = (-b + discriminant_sqrted ) / (2.0 * a);
                 if root > t_max || root < t_min {
                     return None;
                 } 
             }
             let hit_point = origin + ray.direction.clone().scale(root);
-            let normal = hit_point.normalize();
+            let normal = (hit_point - self.center).normalize();
             if ray.direction.dot(&normal) > 0.0 {
                 Some(HitReturn{hit_position: hit_point, normal: -normal, front_face: true, t: root, object_color: self.color})
             } else {
